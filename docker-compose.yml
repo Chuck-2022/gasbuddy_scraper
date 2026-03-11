@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  gasbuddy-scraper:
+    build: .
+    container_name: gasbuddy-scraper
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./websites.db:/app/websites.db
+      - ./templates:/app/templates
+    environment:
+      - FLASK_ENV=production
+    restart: unless-stopped
+    networks:
+      - gasbuddy-network
+
+networks:
+  gasbuddy-network:
+    driver: bridge
