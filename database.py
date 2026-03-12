@@ -1,5 +1,7 @@
 import sqlite3
 from common import *
+from flask import flash
+
     
 def init_db():
     conn = sqlite3.connect('websites.db')
@@ -29,6 +31,11 @@ def get_all_websites():
 def add_website(url, name_data="", price_data="", updated_data="", gmap_link=''):
     conn = sqlite3.connect('websites.db')
     c = conn.cursor()
+    c.execute('SELECT id FROM websites WHERE url = ?', (url,))
+    existing = c.fetchone()
+    if existing:
+        flash('Url exist')
+        return
     c.execute('''
         INSERT INTO websites (url, name_data, price_data, updated_data, last_updated, gmap) 
         VALUES (?, ?, ?, ?, ?, ?)

@@ -1,4 +1,5 @@
 import requests
+import random 
 from lxml import html
 from datetime import datetime, timedelta, timezone
 
@@ -15,14 +16,24 @@ def lint_data(data):
         return data.encode('latin1').decode('utf-8')
     except:
         return data
+    
 
 def fetch_data(url):
     # Test if URL is accessible
+    USER_AGENTS = [
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/109.0',
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    ]
+    t = random.choice(USER_AGENTS)
+    print(t)
     headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'User-Agent': t,
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
         'Referer': 'https://www.gasbuddy.com/',
     }
+
     response = requests.get(url, headers=headers, timeout=10)
     response.raise_for_status()
     response.encoding = 'utf-8'
@@ -47,14 +58,26 @@ def fetch_data(url):
     updated_data = updated_elements[0].text.strip() if updated_elements else "Unknown"
 
     # Extract gmap link
-    gmap_base = "https://www.google.com/maps/dir//"
-    address_xpath1 = "/html/body/div[1]/div/div[3]/div/div/div[2]/div[1]/div[1]/div[1]/div[1]/div[2]/div[2]/div/span/span[1]"
-    address_xpath2 = "/html/body/div[1]/div/div[3]/div/div/div[2]/div[1]/div[1]/div[1]/div[1]/div[2]/div[2]/div/span/span[3]/br"
-    address_elements1 = tree.xpath(address_xpath1)[0]
-    address_elements2 = tree.xpath(address_xpath2)[0]
-    address_data = address_elements1.text.strip() + address_elements2.tail.strip()
-    address_data = lint_data(address_data)
+    try:
+        address_xpath1 = "/html/body/div[1]/div/div[3]/div/div/div[2]/div[1]/div[1]/div[1]/div[1]/div[2]/div[2]/div/span/span[1]"
+        address_elements1 = tree.xpath(address_xpath1)[0]
+        address_xpath2 = "/html/body/div[1]/div/div[3]/div/div/div[2]/div[1]/div[1]/div[1]/div[1]/div[2]/div[2]/div/span/span[3]/br"
+        address_elements2 = tree.xpath(address_xpath2)[0]
+        address_data = address_elements1.text.strip() + address_elements2.tail.strip()
+        address_data = lint_data(address_data)
+    except:
+        try:
+            address_xpath1 = "/html/body/div[1]/div/div[3]/div/div/div[2]/div[1]/div[1]/div[1]/div[1]/div[2]/div[3]/div/span/span[1]"
+            address_elements1 = tree.xpath(address_xpath1)[0]
+            address_xpath2 = "/html/body/div[1]/div/div[3]/div/div/div[2]/div[1]/div[1]/div[1]/div[1]/div[2]/div[3]/div/span/span[3]/br"
+            address_elements2 = tree.xpath(address_xpath2)[0]
+            address_data = address_elements1.text.strip() + address_elements2.tail.strip()
+            address_data = lint_data(address_data)
+        except:
+            address_data = ''
+            address_data = ''
 
+    gmap_base = "https://www.google.com/maps/dir//"
     address = address_data.replace(' ',"+")
     gmap_link = gmap_base + address
     return name_data, price_data, updated_data, gmap_link

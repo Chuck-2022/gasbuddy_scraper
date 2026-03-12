@@ -52,10 +52,13 @@
         </div> -->
         <button type="submit">Add Website</button>
     </form>
-
+    
     <!-- Websites Table -->
     <h2>Managed Websites</h2>
     {% if websites %}
+    <form method="POST" action="{{ url_for('update_all') }}">
+        <button type="submit">Update All</button>
+    </form>
         <table>
             <thead>
                 <tr>

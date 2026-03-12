@@ -1,12 +1,12 @@
 services:
   gasbuddy-scraper:
-    image: docker.io/library/gasbuddy-scraper
+    image: localhost/gasbuddy-scraper:latest
     container_name: gasbuddy-scraper
     ports:
       - 5000:5000
     volumes:
-      - /mnt/main/custom_apps/gasbuddy_scraper/websites.db:/app/websites.db
-      - /mnt/main/custom_apps/gasbuddy_scraper/templates:/app/templates
+      - ./websites.db:/app/websites.db
+      - ./templates:/app/templates
     environment:
       - FLASK_ENV=production
     restart: unless-stopped
