@@ -3,8 +3,9 @@ import random
 from database import *
 import time
 from common import *
+from apscheduler.schedulers.background import BackgroundScheduler 
 app = Flask(__name__)
-app.secret_key = 'your-secret-key-here'  # Change this to a random secret key
+app.secret_key = '&^DTNmD2jHJ^e3^h5zgFgpJ@uvAx!U7pC%*hZjEQ$^&Ag9yY`k'
 
 # Initialize database
 init_db()
@@ -50,7 +51,7 @@ def update_all():
     try:
         for w in websites:
             update_data(w[0])
-            time.sleep(random.uniform(1.1,1.9))
+            time.sleep(random.uniform(0.5,1.5))
         flash('Data updated successfully!', 'success')
     except:
         None
@@ -88,4 +89,12 @@ def update_data(website_id):
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0")
+    # Setup scheduler
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(update_all, 'interval', minutes=15)
+    scheduler.start()
+    
+    try:
+        app.run(host="0.0.0.0")
+    except (KeyboardInterrupt, SystemExit):
+        scheduler.shutdown()
