@@ -45,16 +45,19 @@ def index():
         websites = get_all_websites()
         return render_template('index.html', websites=websites)
 
-@app.route('/update_all', methods=['POST'])
-def update_all():
+def update_all_data():
     websites = get_all_websites()
     try:
         for w in websites:
             update_data(w[0])
             time.sleep(random.uniform(0.5,1.5))
+        print('Data updated successfully!')
         flash('Data updated successfully!', 'success')
     except:
         None
+@app.route('/update_all', methods=['POST'])
+def update_all():
+    update_all_data()
     return redirect(url_for('index'))
 
 @app.route('/delete/<int:website_id>')
@@ -91,7 +94,7 @@ def update_data(website_id):
 if __name__ == '__main__':
     # Setup scheduler
     scheduler = BackgroundScheduler()
-    scheduler.add_job(update_all, 'interval', minutes=15)
+    scheduler.add_job(update_all_data, 'interval', minutes=5)
     scheduler.start()
     
     try:
